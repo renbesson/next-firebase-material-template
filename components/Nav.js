@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useUser } from '../context/userContext';
 import Link from 'next/link';
 import { fade, makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
@@ -11,11 +11,12 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import MenuIcon from '@material-ui/icons/Menu';
 import SearchIcon from '@material-ui/icons/Search';
-import AccountCircle from '@material-ui/icons/AccountCircle';
+import AccountBoxOutlinedIcon from '@material-ui/icons/AccountBoxOutlined';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import MailIcon from '@material-ui/icons/Mail';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import MoreIcon from '@material-ui/icons/MoreVert';
+import ShoppingCartOutlinedIcon from '@material-ui/icons/ShoppingCartOutlined';
 
 const useStyles = makeStyles((theme) => ({
 	root: { margin: 0 },
@@ -82,8 +83,9 @@ const useStyles = makeStyles((theme) => ({
 	},
 }));
 
-export default function Nav({ user }) {
+export default function Nav() {
 	const classes = useStyles();
+	const { loadingUser, user } = useUser();
 	const [anchorEl, setAnchorEl] = React.useState(null);
 	const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
 
@@ -106,10 +108,6 @@ export default function Nav({ user }) {
 	const handleMobileMenuOpen = (event) => {
 		setMobileMoreAnchorEl(event.currentTarget);
 	};
-
-	useEffect(() => {
-		console.log('Nav User:', user);
-	}, []);
 
 	const mobileMenuId = 'primary-search-account-menu-mobile';
 	const renderMobileMenu = (
@@ -145,17 +143,17 @@ export default function Nav({ user }) {
 					aria-haspopup="true"
 					color="inherit"
 				>
-					<AccountCircle />
+					<AccountBoxOutlinedIcon />
 				</IconButton>
 				<p>Profile</p>
 			</MenuItem>
 		</Menu>
 	);
 
-	const notLogged = (
-		<Link href="/Login">
+	const notLoggedIn = (
+		<Link href="/SignIn/">
 			<IconButton edge="end" aria-label="Sign in or sign ip" color="inherit">
-				<AccountCircle />
+				<AccountBoxOutlinedIcon />
 				<Typography className={classes.title} variant="h6" noWrap>
 					Sign in/ Sign up
 				</Typography>
@@ -167,13 +165,13 @@ export default function Nav({ user }) {
 		<>
 			<Link href="/MyAccount">
 				<IconButton edge="end" aria-label="My account" color="inherit">
-					<AccountCircle />
+					<AccountBoxOutlinedIcon />
 					<Typography className={classes.title} variant="h6" noWrap>
 						My Account
 					</Typography>
 				</IconButton>
 			</Link>
-			<Link href="/Logout">
+			<Link href="/SignOut/">
 				<IconButton edge="end" aria-label="Log out" color="inherit">
 					<ExitToAppIcon />
 					<Typography className={classes.title} variant="h6" noWrap>
@@ -189,7 +187,7 @@ export default function Nav({ user }) {
 			<AppBar position="sticky" className={classes.root}>
 				<Toolbar>
 					<IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="open drawer">
-						<MenuIcon />{' '}
+						<MenuIcon />
 						<Typography className={classes.title} variant="h6" noWrap>
 							Shop All Departments
 						</Typography>
@@ -217,10 +215,13 @@ export default function Nav({ user }) {
 						</IconButton>
 						<IconButton aria-label="show 17 new notifications" color="inherit">
 							<Badge badgeContent={17} color="secondary">
-								<NotificationsIcon />
+								<ShoppingCartOutlinedIcon />
 							</Badge>
+							<Typography className={classes.title} variant="h6" noWrap>
+								Cart
+							</Typography>
 						</IconButton>
-						{user ? loggedIn : notLogged}
+						{user ? loggedIn : notLoggedIn}
 					</div>
 					<div className={classes.sectionMobile}>
 						<IconButton

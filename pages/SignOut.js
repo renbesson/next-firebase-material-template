@@ -1,8 +1,7 @@
-import { useEffect } from 'react';
-import firebase from '../firebase/clientApp';
+import firebase from '@/firebase/clientApp';
 import { useRouter } from 'next/router';
 
-export default function Logout(user) {
+export default function SignOut(user) {
 	const router = useRouter();
 	useEffect(() => {
 		// Firebase updates the id token every hour, this

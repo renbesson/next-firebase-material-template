@@ -1,9 +1,9 @@
+import firebase from '@/firebase/clientApp';
 import { useState } from 'react';
+import { useUser } from '../context/userContext';
 import { useRouter } from 'next/router';
-import firebase from '../firebase/clientApp';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
@@ -33,6 +33,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function SignUp() {
 	const classes = useStyles();
+	const { loadingUser, user } = useUser();
 
 	const [firstName, setFirstName] = useState('');
 	const [lastName, setLastName] = useState('');
@@ -49,6 +50,8 @@ export default function SignUp() {
 				res.user.updateProfile({
 					displayName: `${firstName} ${lastName}`,
 				});
+				const userObj = { uid: res.user.uid, email: res.user.email, displayName: `${firstName} ${lastName}` };
+				firebase.firestore().collection('users').doc(res.user.uid).set(userObj);
 				alert('User created successfully!');
 				router.push('/');
 			})
@@ -57,100 +60,115 @@ export default function SignUp() {
 			});
 	}
 
-	return (
-		<Card className={classes.root}>
-			<CssBaseline />
-			<CardContent>
-				<Avatar className={classes.avatar}>
-					<LockOutlinedIcon />
-				</Avatar>
+	// Finishes firebase onAuthStateChanged and didn't find any user
+	if (!loadingUser && user === null) {
+		return (
+			<Card className={classes.root}>
+				<CardContent>
+					<Avatar className={classes.avatar}>
+						<LockOutlinedIcon />
+					</Avatar>
+					<Typography component="h1" variant="h5">
+						Sign up
+					</Typography>
+					<FormControl className={classes.form}>
+						<Grid container spacing={2}>
+							<Grid item xs={12} sm={6}>
+								<TextField
+									autoComplete="given-name"
+									name="firstName"
+									id="firstName"
+									label="First Name"
+									variant="outlined"
+									required
+									fullWidth
+									autoFocus
+									value={firstName}
+									onChange={(e) => setFirstName(e.target.value)}
+								/>
+							</Grid>
+							<Grid item xs={12} sm={6}>
+								<TextField
+									autoComplete="family-name"
+									name="lastName"
+									id="lastName"
+									label="Last Name"
+									variant="outlined"
+									required
+									fullWidth
+									value={lastName}
+									onChange={(e) => setLastName(e.target.value)}
+								/>
+							</Grid>
+							<Grid item xs={12}>
+								<TextField
+									autoComplete="email"
+									name="email"
+									id="email"
+									label="Email Address"
+									variant="outlined"
+									required
+									fullWidth
+									value={email}
+									onChange={(e) => setEmail(e.target.value)}
+								/>
+							</Grid>
+							<Grid item xs={12}>
+								<TextField
+									autoComplete="new-password"
+									name="password"
+									id="password"
+									label="Password"
+									variant="outlined"
+									required
+									fullWidth
+									type="password"
+									value={password}
+									onChange={(e) => setPassword(e.target.value)}
+								/>
+							</Grid>
+							<Grid item xs={12}>
+								<FormControlLabel
+									control={<Checkbox value="allowExtraEmails" color="primary" />}
+									label="I want to receive inspiration, marketing promotions and updates via email."
+								/>
+							</Grid>
+						</Grid>
+						<Button
+							type="submit"
+							fullWidth
+							variant="contained"
+							color="primary"
+							className={classes.submit}
+							onClick={createUser}
+						>
+							Sign Up
+						</Button>
+						<Grid container justify="flex-end">
+							<Grid item>
+								<Link href="/SignIn/" variant="body2">
+									Already have an account? Sign in
+								</Link>
+							</Grid>
+						</Grid>
+					</FormControl>
+				</CardContent>
+			</Card>
+		);
+		// Finishes firebase onAuthStateChanged and a user is found
+	} else if (user) {
+		setTimeout(() => {
+			router.push('/');
+		}, 2000);
+		return (
+			<>
 				<Typography component="h1" variant="h5">
-					Sign up
+					You are already logged in. Redirecting to the home page...
 				</Typography>
-				<FormControl className={classes.form} noValidate>
-					<Grid container spacing={2}>
-						<Grid item xs={12} sm={6}>
-							<TextField
-								autoComplete="given-name"
-								name="firstName"
-								id="firstName"
-								label="First Name"
-								variant="outlined"
-								required
-								fullWidth
-								autoFocus
-								value={firstName}
-								onChange={(e) => setFirstName(e.target.value)}
-							/>
-						</Grid>
-						<Grid item xs={12} sm={6}>
-							<TextField
-								autoComplete="family-name"
-								name="lastName"
-								id="lastName"
-								label="Last Name"
-								variant="outlined"
-								required
-								fullWidth
-								value={lastName}
-								onChange={(e) => setLastName(e.target.value)}
-							/>
-						</Grid>
-						<Grid item xs={12}>
-							<TextField
-								autoComplete="email"
-								name="email"
-								id="email"
-								label="Email Address"
-								variant="outlined"
-								required
-								fullWidth
-								value={email}
-								onChange={(e) => setEmail(e.target.value)}
-							/>
-						</Grid>
-						<Grid item xs={12}>
-							<TextField
-								autoComplete="new-password"
-								name="password"
-								id="password"
-								label="Password"
-								variant="outlined"
-								required
-								fullWidth
-								type="password"
-								value={password}
-								onChange={(e) => setPassword(e.target.value)}
-							/>
-						</Grid>
-						<Grid item xs={12}>
-							<FormControlLabel
-								control={<Checkbox value="allowExtraEmails" color="primary" />}
-								label="I want to receive inspiration, marketing promotions and updates via email."
-							/>
-						</Grid>
-					</Grid>
-					<Button
-						type="submit"
-						fullWidth
-						variant="contained"
-						color="primary"
-						className={classes.submit}
-						onClick={createUser}
-					>
-						Sign Up
-					</Button>
-					<Grid container justify="flex-end">
-						<Grid item>
-							<Link href="/Login" variant="body2">
-								Already have an account? Sign in
-							</Link>
-						</Grid>
-					</Grid>
-				</FormControl>
-				{email}
-				{password}
-			</CardContent>
-		</Card>
-	);
+			</>
+		);
+		// // While firebase onAuthStateChanged is loading
+	} else {
+		return <></>;
+	}
 }

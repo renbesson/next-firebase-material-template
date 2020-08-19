@@ -15,7 +15,7 @@ const useStyles = makeStyles((theme) => ({
 	root: { padding: theme.spacing(1) },
 	card: {
 		height: 150,
-		minWidth: 380,
+		minWidth: 280,
 	},
 	cardActions: {
 		alignSelf: 'flex-end',
@@ -61,7 +61,11 @@ export default function ProductCard({ productData }) {
 			<Grid container>
 				<CardMedia
 					className={classes.media}
-					image={productData.images ? productData.images[0].url : '/images/600px-No_image_available.png'}
+					image={
+						productData.images && productData.images[0]
+							? productData.images[0].url
+							: '/images/600px-No_image_available.png'
+					}
 					title={productData.name}
 				/>
 				<Grid container item xs className={classes.root} direction="column" alignContent="space-between">
@@ -79,35 +83,6 @@ export default function ProductCard({ productData }) {
 						<Typography variant="overline" component="p" align="justify" style={{ paddingRight: '20px' }}>
 							Code: {productData.productCode}
 						</Typography>
-					</Grid>
-					<Grid item xs className={classes.zeroPadding}>
-						<CardActions disableSpacing={true} classes={{ root: classes.cardActions }}>
-							<IconButton
-								aria-label="increment quantity"
-								className={classes.buttonSize}
-								onClick={decrementQuantity}
-								variant="contained"
-							>
-								<RemoveRoundedIcon />
-							</IconButton>
-							<TextField
-								variant="outlined"
-								margin="dense"
-								value={quantity}
-								onChange={(e) => setQuantity(e.target.value)}
-							></TextField>
-							<IconButton
-								aria-label="increment quantity"
-								className={classes.buttonSize}
-								onClick={incrementQuantity}
-								variant="contained"
-							>
-								<AddRoundedIcon />
-							</IconButton>
-							<IconButton aria-label="delete" className={classes.buttonSize}>
-								<ShoppingCartOutlinedIcon />
-							</IconButton>
-						</CardActions>
 					</Grid>
 				</Grid>
 			</Grid>
