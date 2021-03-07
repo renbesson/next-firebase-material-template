@@ -15,11 +15,21 @@ export default function UserContextComp({ children }) {
 					// User is signed in.
 					const { uid, displayName, email, photoURL } = user;
 					// You could also look for the user doc in your Firestore (if you have one):
-					// const userDoc = await firebase.firestore().doc(`users/${uid}`).get()
-					setUser({ uid, displayName, email, photoURL });
+					firebase
+						.firestore()
+						.doc(`users/${uid}`)
+						.onSnapshot((doc) => {
+							setUser((prevUser) => {
+								return { ...prevUser, ...doc.data() };
+							});
+						});
+					setUser((prevUser) => {
+						return { ...prevUser, uid, displayName, email, photoURL };
+					});
 				} else setUser(null);
 			} catch (error) {
 				// Most probably a connection error. Handle appropriately.
+				console.error(error);
 			} finally {
 				setLoadingUser(false);
 			}

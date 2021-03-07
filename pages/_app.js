@@ -1,75 +1,32 @@
 import UserProvider from '@/context/userContext';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Head from 'next/head';
-import Nav from '../components/Nav';
-import Header from '../components/Header';
+import Header from '@/components/Header';
 import Container from '@material-ui/core/Container';
 import { ThemeProvider, makeStyles } from '@material-ui/core/styles';
 import theme from '@theme';
 
-// admin
-import clsx from 'clsx';
-import NavAdmin from '@/components/admin/NavAdmin';
+// Fuego
+import { Fuego, FuegoProvider } from '@nandorojo/swr-firestore';
 
-const drawerWidth = 240;
+//Global variables
+import StoreProvider from '@context/storeContext';
+
+const clientCredentials = {
+	apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+	authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+	databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+	projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+	storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+	messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+	appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
+
+const fuego = new Fuego(clientCredentials);
 
 const useStyles = makeStyles((theme) => ({
 	root: {
 		display: 'flex',
-	},
-	toolbar: {
-		paddingRight: 24, // keep right padding when drawer closed
-	},
-	toolbarIcon: {
-		display: 'flex',
-		alignItems: 'center',
-		justifyContent: 'flex-end',
-		padding: '0 8px',
-		...theme.mixins.toolbar,
-	},
-	appBar: {
-		zIndex: theme.zIndex.drawer + 1,
-		transition: theme.transitions.create(['width', 'margin'], {
-			easing: theme.transitions.easing.sharp,
-			duration: theme.transitions.duration.leavingScreen,
-		}),
-	},
-	appBarShift: {
-		marginLeft: drawerWidth,
-		width: `calc(100% - ${drawerWidth}px)`,
-		transition: theme.transitions.create(['width', 'margin'], {
-			easing: theme.transitions.easing.sharp,
-			duration: theme.transitions.duration.enteringScreen,
-		}),
-	},
-	menuButton: {
-		marginRight: 36,
-	},
-	menuButtonHidden: {
-		display: 'none',
-	},
-	title: {
-		flexGrow: 1,
-	},
-	drawerPaper: {
-		position: 'relative',
-		whiteSpace: 'nowrap',
-		width: drawerWidth,
-		transition: theme.transitions.create('width', {
-			easing: theme.transitions.easing.sharp,
-			duration: theme.transitions.duration.enteringScreen,
-		}),
-	},
-	drawerPaperClose: {
-		overflowX: 'hidden',
-		transition: theme.transitions.create('width', {
-			easing: theme.transitions.easing.sharp,
-			duration: theme.transitions.duration.leavingScreen,
-		}),
-		width: theme.spacing(7),
-		[theme.breakpoints.up('sm')]: {
-			width: theme.spacing(9),
-		},
 	},
 	appBarSpacer: theme.mixins.toolbar,
 	content: {
@@ -78,73 +35,38 @@ const useStyles = makeStyles((theme) => ({
 		overflow: 'auto',
 	},
 	container: {
+		maxWidth: '1200px',
 		paddingTop: theme.spacing(4),
 		paddingBottom: theme.spacing(4),
 		minHeight: '50vh',
 		backgroundColor: theme.palette.background.default,
-	},
-	paper: {
-		padding: theme.spacing(2),
-		display: 'flex',
-		overflow: 'auto',
-		flexDirection: 'column',
-	},
-	fixedHeight: {
-		height: 240,
 	},
 }));
 
 export default function App({ Component, pageProps }) {
 	const classes = useStyles();
 
-	const [open, setOpen] = React.useState(true);
-	const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
-
-	if (Component.AdminLayout) {
-		return (
-			<div className={classes.root}>
-				<ThemeProvider theme={theme}>
-					<UserProvider>
-						<NavAdmin />
-					</UserProvider>
-					<main className={classes.content}>
-						<div className={classes.appBarSpacer} />
-						<Container fixed className={classes.container}>
-							<UserProvider>
+	return (
+		<FuegoProvider fuego={fuego}>
+			<UserProvider>
+				<StoreProvider>
+					<ThemeProvider theme={theme}>
+						<Head>
+							<title>Next.js w/ Firebase Client-Side</title>
+							<link rel="icon" href="/favicon.ico" />
+						</Head>
+						<nav style={{ marginBottom: '64px' }}>
+							<Header></Header>
+						</nav>
+						<main>
+							<Container fixed className={classes.container}>
 								<CssBaseline />
 								<Component {...pageProps} />
-							</UserProvider>
-						</Container>
-					</main>
-				</ThemeProvider>
-			</div>
-		);
-	}
-
-	return (
-		<>
-			<ThemeProvider theme={theme}>
-				<Head>
-					<title>Next.js w/ Firebase Client-Side</title>
-					<link rel="icon" href="/favicon.ico" />
-				</Head>
-				<header>
-					<Header />
-				</header>
-				<nav style={{ marginBottom: '64px' }}>
-					<UserProvider>
-						<Nav />
-					</UserProvider>
-				</nav>
-				<main>
-					<Container fixed className={classes.container}>
-						<UserProvider>
-							<CssBaseline />
-							<Component {...pageProps} />
-						</UserProvider>
-					</Container>
-				</main>
-			</ThemeProvider>
-		</>
+							</Container>
+						</main>
+					</ThemeProvider>
+				</StoreProvider>
+			</UserProvider>
+		</FuegoProvider>
 	);
 }
